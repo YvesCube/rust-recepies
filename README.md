@@ -31,7 +31,7 @@ This is a static web application. No backend or database is required.
 
 1.  Clone the repository:
     ```bash
-    git clone [https://github.com/yourusername/rust-crafting-master.git](https://github.com/yourusername/rust-crafting-master.git)
+    git clone [https://github.com/YvesCube/rust-crafting-master.git](https://github.com/YvesCube/rust-crafting-master.git)
     ```
 2.  Open `index.html` in your browser.
 
