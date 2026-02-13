@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rust Crafting Calculator</title>
+    <title>Rust Crafting Master</title>
     <style>
         :root {
             --bg-color: #1b1b1b;
@@ -32,22 +32,30 @@
             position: relative;
         }
         
-        /* Language Selector */
-        .lang-switch {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+        /* Language Flags */
+        .lang-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 10px;
         }
-        .lang-switch select {
+        .flag-btn {
             background: #141414;
-            color: #fff;
-            padding: 5px;
             border: 1px solid #444;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 20px;
+            padding: 5px 10px;
+            transition: 0.2s;
+            filter: grayscale(100%);
+        }
+        .flag-btn:hover, .flag-btn.active {
+            filter: grayscale(0%);
+            border-color: var(--accent-color);
+            background: #222;
         }
 
-        h1 { color: var(--accent-color); text-align: center; margin-bottom: 20px; margin-top: 10px;}
+        h1 { color: var(--accent-color); text-align: center; margin-bottom: 20px; margin-top: 0; text-transform: uppercase; letter-spacing: 1px;}
         label { display: block; margin-bottom: 8px; font-weight: bold; margin-top: 15px;}
         
         input, select {
@@ -61,7 +69,7 @@
             box-sizing: border-box;
         }
         
-        button {
+        button.calc-btn {
             width: 100%;
             padding: 15px;
             background-color: var(--btn-color);
@@ -75,7 +83,7 @@
             text-transform: uppercase;
             transition: 0.2s;
         }
-        button:hover { background-color: var(--btn-hover); }
+        button.calc-btn:hover { background-color: var(--btn-hover); }
         
         .result-box {
             margin-top: 25px;
@@ -97,7 +105,6 @@
         
         ul { list-style-type: none; padding: 0; }
         ul li { background: #222; margin-bottom: 5px; padding: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;}
-        ul li img { width: 20px; height: 20px; margin-right: 10px; vertical-align: middle; }
         .val { color: #fff; font-weight: bold; }
         
         .instruction {
@@ -114,28 +121,23 @@
 <body>
 
 <div class="container">
-    <div class="lang-switch">
-        <select id="language" onchange="changeLanguage()">
-            <option value="en">English</option>
-            <option value="cs">Čeština</option>
-            <option value="ru">Русский</option>
-            <option value="zh">中文</option>
-        </select>
+    <div class="lang-buttons">
+        <button class="flag-btn active" onclick="setLang('en')" id="btn-en" title="English">🇺🇸</button>
+        <button class="flag-btn" onclick="setLang('cs')" id="btn-cs" title="Čeština">🇨🇿</button>
+        <button class="flag-btn" onclick="setLang('ru')" id="btn-ru" title="Русский">🇷🇺</button>
+        <button class="flag-btn" onclick="setLang('zh')" id="btn-zh" title="中文">🇨🇳</button>
     </div>
 
-    <h1 id="t_title">Rust Crafting Calculator</h1>
+    <h1>Rust Crafting Master</h1>
     
     <label for="itemType" id="t_selectItem">Select Item</label>
     <select id="itemType">
-        <option value="rocket">Rocket</option>
-        <option value="c4">C4 (Timed Explosive)</option>
-        <option value="hv">HV Rocket</option>
-    </select>
+        </select>
 
     <label for="sulfur" id="t_enterSulfur">Sulfur Amount</label>
     <input type="number" id="sulfur" placeholder="50000">
 
-    <button onclick="calculate()" id="t_calculateBtn">Calculate</button>
+    <button onclick="calculate()" id="t_calculateBtn" class="calc-btn">Calculate</button>
 
     <div id="result" class="result-box">
         <img id="resultImage" src="" alt="Item" class="item-image">
@@ -153,7 +155,7 @@
         </div>
         <div class="instruction" id="expInstructionBox">
             <span id="t_step3">Keep</span> <span id="sulfurToKeep">0</span> <span id="t_sulfurRaw2">Sulfur</span> <span id="t_inInventory">raw in inventory</span>.<br>
-            <span id="t_step4">Use it to craft</span> <span id="expCount">0</span> <span id="t_explosives">Explosives</span>.
+            <span id="t_step4">Use it to craft</span> <span id="expCount">0</span> <span id="expLabel">Explosives</span>.
         </div>
 
         <div class="section-title" id="t_otherMaterials">2. Other Materials Needed</div>
@@ -166,7 +168,6 @@
     // --- TRANSLATIONS ---
     const translations = {
         en: {
-            title: "Rust Crafting Calculator",
             selectItem: "What to craft?",
             enterSulfur: "Total Sulfur Amount",
             calculateBtn: "Calculate Crafting",
@@ -176,16 +177,19 @@
             step1: "Take",
             step2: "Craft it into",
             step3: "Keep",
-            step4: "Use it to craft",
+            step4: "Use it to craft", // Or "Use it for"
             sulfurRaw: "Sulfur",
             gp: "Gunpowder",
             explosives: "Explosives",
             inInventory: "raw in inventory",
             leftover: "Leftover Sulfur",
+            useForAmmo: "Use it directly in Ammo mixing",
             items: {
                 rocket: "Rocket",
                 c4: "Timed Explosive Charge",
                 hv: "High Velocity Rocket",
+                incen: "Incendiary Rocket",
+                exp556: "Explosive 5.56 Ammo (Crafts)",
                 charcoal: "Charcoal",
                 frags: "Metal Fragments",
                 fuel: "Low Grade Fuel",
@@ -195,7 +199,6 @@
             }
         },
         cs: {
-            title: "Rust Kalkulačka",
             selectItem: "Co chceš vyrábět?",
             enterSulfur: "Množství sulfuru",
             calculateBtn: "Spočítat",
@@ -211,10 +214,13 @@
             explosives: "Explosives",
             inInventory: "v inventáři",
             leftover: "Zbytek sulfuru",
+            useForAmmo: "Použij přímo při výrobě nábojů",
             items: {
                 rocket: "Raketa",
                 c4: "C4 (Timed Explosive)",
                 hv: "HV Raketa",
+                incen: "Zápalná Raketa (Incendiary)",
+                exp556: "Explozivní munice 5.56 (Crafty)",
                 charcoal: "Charcoal (Uhlí)",
                 frags: "Metal Fragments",
                 fuel: "Low Grade Fuel",
@@ -224,9 +230,8 @@
             }
         },
         ru: {
-            title: "Rust Калькулятор",
             selectItem: "Что крафтим?",
-            enterSulfur: "Количество Серы (Sulfur)",
+            enterSulfur: "Количество Серы",
             calculateBtn: "Рассчитать",
             youCanCraft: "Можно скрафтить:",
             sulfurManagement: "1. Управление серой",
@@ -236,24 +241,26 @@
             step3: "Оставь",
             step4: "Используй для",
             sulfurRaw: "Серы",
-            gp: "Пороха (Gunpowder)",
-            explosives: "Взрывчатки (Explosives)",
+            gp: "Пороха",
+            explosives: "Взрывчатки",
             inInventory: "в инвентаре",
-            leftover: "Остаток серы",
+            leftover: "Остаток",
+            useForAmmo: "Используй для крафта патронов",
             items: {
                 rocket: "Ракета",
                 c4: "C4 (Взрывчатка)",
                 hv: "HV Ракета",
-                charcoal: "Уголь (Charcoal)",
+                incen: "Зажигательная ракета",
+                exp556: "Разрывные патроны (Крафты)",
+                charcoal: "Уголь",
                 frags: "Фрагменты металла",
                 fuel: "Топлево (LGF)",
-                pipe: "Труба (Pipe)",
-                tech: "Микросхемы (Tech Trash)",
+                pipe: "Труба",
+                tech: "Микросхемы",
                 cloth: "Ткань"
             }
         },
         zh: {
-            title: "Rust 工艺计算器",
             selectItem: "你想制造什么？",
             enterSulfur: "硫磺总量",
             calculateBtn: "计算",
@@ -265,14 +272,17 @@
             step3: "保留",
             step4: "用于制作",
             sulfurRaw: "硫磺",
-            gp: "火药 (Gunpowder)",
-            explosives: "炸药 (Explosives)",
+            gp: "火药",
+            explosives: "炸药",
             inInventory: "在背包中",
             leftover: "剩余硫磺",
+            useForAmmo: "直接用于制作弹药",
             items: {
-                rocket: "火箭 (Rocket)",
-                c4: "定时炸药 (C4)",
-                hv: "高速火箭 (HV)",
+                rocket: "火箭",
+                c4: "定时炸药",
+                hv: "高速火箭",
+                incen: "燃烧火箭",
+                exp556: "爆炸弹药 (组)",
                 charcoal: "木炭",
                 frags: "金属碎片",
                 fuel: "低级燃料",
@@ -284,13 +294,18 @@
     };
 
     // --- DATA & LOGIC ---
+    // sulfurTotal = celková cena sulfuru (GP + Raw)
+    // gpPerItem = kolik GP se spotřebuje CELKEM (přímo v itemu + skrze explosives)
+    // explosivesPerItem = kolik výbušnin je třeba
+    // rawSulfurToKeep = kolik sulfuru se nesmí předělat na GP (pro explosives nebo přímo do itemu)
+    
     const recipes = {
         rocket: {
             id: "rocket",
             sulfurTotal: 1400,
-            gpPerItem: 650,
+            gpPerItem: 650, 
             explosivesPerItem: 10,
-            rawSulfurForExp: 100,
+            rawSulfurToKeep: 100, // 10 explosives * 10
             imgUrl: "https://rustlabs.com/img/items180/ammo.rocket.basic.png",
             other: [
                 {id: "charcoal", amount: 1950},
@@ -299,12 +314,26 @@
                 {id: "pipe", amount: 2}
             ]
         },
+        incen: {
+            id: "incen",
+            sulfurTotal: 610, // 250 GP (500) + 1 Exp (50GP=100 + 10raw) = 610
+            gpPerItem: 300, // 250 direct + 50 in explosive
+            explosivesPerItem: 1,
+            rawSulfurToKeep: 10, // 1 explosive * 10
+            imgUrl: "https://rustlabs.com/img/items180/ammo.rocket.fire.png",
+            other: [
+                {id: "charcoal", amount: 900}, // 300 GP * 3
+                {id: "frags", amount: 10}, // 1 exp * 10
+                {id: "fuel", amount: 260}, // 250 direct + 10 in exp
+                {id: "pipe", amount: 2}
+            ]
+        },
         c4: {
             id: "c4",
             sulfurTotal: 2200,
             gpPerItem: 1000,
             explosivesPerItem: 20,
-            rawSulfurForExp: 200,
+            rawSulfurToKeep: 200,
             imgUrl: "https://rustlabs.com/img/items180/explosive.timed.png",
             other: [
                 {id: "charcoal", amount: 3000},
@@ -319,23 +348,43 @@
             sulfurTotal: 200,
             gpPerItem: 100,
             explosivesPerItem: 0,
-            rawSulfurForExp: 0,
+            rawSulfurToKeep: 0,
             imgUrl: "https://rustlabs.com/img/items180/ammo.rocket.hv.png",
             other: [
                 {id: "charcoal", amount: 300},
                 {id: "pipe", amount: 1}
+            ]
+        },
+        exp556: {
+            id: "exp556",
+            // 1 Craft = 2 bullets
+            // Recipe: 10 Sulfur + 20 GP + 10 Frags
+            sulfurTotal: 50, // 20 GP (40) + 10 Raw = 50
+            gpPerItem: 20,
+            explosivesPerItem: 0,
+            rawSulfurToKeep: 10, // Tady je to surový sulfur přímo do munice, ne do explosives!
+            imgUrl: "https://rustlabs.com/img/items180/ammo.rifle.explosive.png",
+            other: [
+                {id: "charcoal", amount: 60},
+                {id: "frags", amount: 10}
             ]
         }
     };
 
     let currentLang = "en";
 
-    function changeLanguage() {
-        currentLang = document.getElementById('language').value;
+    function setLang(lang) {
+        currentLang = lang;
+        // Update active button state
+        document.querySelectorAll('.flag-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('btn-' + lang).classList.add('active');
+        
+        updateTexts();
+    }
+
+    function updateTexts() {
         const t = translations[currentLang];
 
-        // Update UI
-        document.getElementById('t_title').innerText = t.title;
         document.getElementById('t_selectItem').innerText = t.selectItem;
         document.getElementById('t_enterSulfur').innerText = t.enterSulfur;
         document.getElementById('t_calculateBtn').innerText = t.calculateBtn;
@@ -346,21 +395,29 @@
         document.getElementById('t_step1').innerText = t.step1;
         document.getElementById('t_step2').innerText = t.step2;
         document.getElementById('t_step3').innerText = t.step3;
-        document.getElementById('t_step4').innerText = t.step4;
         
         document.getElementById('t_sulfurRaw').innerText = t.sulfurRaw;
         document.getElementById('t_sulfurRaw2').innerText = t.sulfurRaw;
         document.getElementById('t_gp').innerText = t.gp;
-        document.getElementById('t_explosives').innerText = t.explosives;
         document.getElementById('t_inInventory').innerText = t.inInventory;
 
-        // Update Dropdown Options
+        // Populate Select Options (keep selection if possible)
         const select = document.getElementById('itemType');
-        select.options[0].text = t.items.rocket;
-        select.options[1].text = t.items.c4;
-        select.options[2].text = t.items.hv;
+        const selectedValue = select.value;
+        select.innerHTML = ""; // Clear existing
+        
+        for (const [key, value] of Object.entries(recipes)) {
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.innerText = t.items[value.id];
+            select.appendChild(opt);
+        }
+        
+        if (selectedValue && recipes[selectedValue]) {
+            select.value = selectedValue;
+        }
 
-        // Re-calculate if result is visible to update inner texts
+        // Re-calculate if result is visible
         if(document.getElementById('result').style.display === 'block') {
             calculate();
         }
@@ -379,31 +436,53 @@
         const maxItems = Math.floor(sulfurInput / recipe.sulfurTotal);
 
         if (maxItems === 0) {
-            alert(`Not enough Sulfur! Need at least ${recipe.sulfurTotal}.`);
+            alert(`Not enough Sulfur!`);
             return;
         }
 
         const totalGP = maxItems * recipe.gpPerItem;
         const sulfurForGP = totalGP * 2;
         const totalExp = maxItems * recipe.explosivesPerItem;
-        const sulfurReserved = maxItems * recipe.rawSulfurForExp;
+        const sulfurReserved = maxItems * recipe.rawSulfurToKeep;
 
         // Image
         document.getElementById('resultImage').src = recipe.imgUrl;
 
         // Numbers
-        document.getElementById('finalCount').innerText = maxItems + " x " + t.items[recipe.id];
+        let countText = maxItems + " x " + t.items[recipe.id];
+        // Special display for ammo (users might want to know total bullets)
+        if(recipe.id === 'exp556') {
+             countText += ` (${maxItems * 2} bullets)`;
+        }
+        
+        document.getElementById('finalCount').innerText = countText;
+        
         const leftover = sulfurInput - (maxItems * recipe.sulfurTotal);
         document.getElementById('itemNameDisplay').innerText = `(${t.leftover}: ${leftover})`;
 
         document.getElementById('sulfurToGP').innerText = sulfurForGP.toLocaleString();
         document.getElementById('gpCount').innerText = totalGP.toLocaleString();
 
+        // Logic for "Step 2" (Explosives vs Raw Mix)
         const expBox = document.getElementById('expInstructionBox');
-        if (recipe.explosivesPerItem > 0) {
+        const expLabel = document.getElementById('expLabel');
+        const step4Label = document.getElementById('t_step4');
+
+        if (recipe.rawSulfurToKeep > 0) {
             expBox.style.display = 'block';
             document.getElementById('sulfurToKeep').innerText = sulfurReserved.toLocaleString();
-            document.getElementById('expCount').innerText = totalExp.toLocaleString();
+            
+            if (recipe.explosivesPerItem > 0) {
+                // Standard rocket/C4 logic
+                step4Label.innerText = t.step4; // "Use it to craft"
+                document.getElementById('expCount').innerText = totalExp.toLocaleString();
+                expLabel.innerText = " " + t.explosives;
+            } else {
+                // Explosive ammo logic (no explosives needed, just mixing)
+                step4Label.innerText = t.useForAmmo; // "Use it directly..."
+                document.getElementById('expCount').innerText = ""; // Hide number
+                expLabel.innerText = ""; // Hide label
+            }
         } else {
             expBox.style.display = 'none';
         }
@@ -421,8 +500,8 @@
         document.getElementById('result').style.display = 'block';
     }
 
-    // Initialize language on load
-    changeLanguage();
+    // Initialize
+    updateTexts();
 </script>
 
 </body>
