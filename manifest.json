@@ -1,0 +1,20 @@
+{
+  "name": "Rust Crafting Master",
+  "short_name": "RustCalc",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1b1b1b",
+  "theme_color": "#cd412b",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
