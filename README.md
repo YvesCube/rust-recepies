@@ -4,7 +4,7 @@
 
 > "Stop guessing how much Gunpowder you need. Calculate it instantly."
 
-[**🔴 LIVE DEMO (Click here)**](https://tvojejmeno.github.io/rust-kalkulacka/)
+[**🔴 LIVE DEMO (Click here)**](https://YvesCube.github.io/rust-crafting-master/)
 
 ![Rust Crafting Master Preview](https://via.placeholder.com/800x400?text=Insert+Screenshot+Here)
 *(You can upload a screenshot of your app to the repository and link it here)*
